@@ -37,8 +37,9 @@ extension  ViewController:UIPickerViewDataSource,UIPickerViewDelegate{
     }
     
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int){
-        unitLabel.text = coinManager.currencyArray[row]
-        coinManager.getCoinPrice(for:coinManager.currencyArray[row])
+        let currency = coinManager.currencyArray[row]
+        unitLabel.text = currency
+        coinManager.getCoinPrice(for:currency)
     }
     
 }

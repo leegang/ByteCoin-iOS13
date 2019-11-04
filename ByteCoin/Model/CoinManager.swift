@@ -7,10 +7,15 @@
 //
 
 import Foundation
+import SwiftyJSON
+
+protocol CoinManagerDelegate{
+    func didUpdateCoin(coin:CoinData)
+    func didHandleError(error:Error)
+}
 
 struct CoinManager {
-    
-//    var delegate =
+    var delegate: CoinManagerDelegate?
     
     let baseURL = "https://apiv2.bitcoinaverage.com/indices/global/ticker/BTC"
     let currencyArray = ["AUD", "BRL","CAD","CNY","EUR","GBP","HKD","IDR","ILS","INR","JPY","MXN","NOK","NZD","PLN","RON","RUB","SEK","SGD","USD","ZAR"]
@@ -19,8 +24,6 @@ struct CoinManager {
         let urlString = "\(baseURL)\(currency)"
         print(urlString)
         performRequestion(with: urlString)
-        
-        
     }
     
     func performRequestion(with urlString:String) {
@@ -28,14 +31,34 @@ struct CoinManager {
             let urlSession = URLSession(configuration:.default)
             let task = urlSession.dataTask(with: url) {(data,resoonse,error) in
                 if error != nil{
-                    print(error)
+                    self.delegate?.didHandleError(error:error!)
+                    return
                 }
                 if let safedData = data {
-                    let dataString = String(data: safedData, encoding: String.Encoding.utf8) as String?
-                    print(dataString)
+                     if let coinValue = self.parseData(safedData)
+                        
+                     {
+                        print(coinValue)
+                        self.delegate?.didUpdateCoin(coin: coinValue)
+                        
+                    }
                 }
             }
             task.resume()
+        }
+    }
+    
+    func parseData(_ coindata:Data) -> CoinData? {
+        do {
+            let coinDataJson = try JSON(data: coindata)
+            let price = coinDataJson["last"].double
+            let coinDataValue = CoinData(price: price!)
+//            print(coinDataValue)
+            return coinDataValue
+        }
+        catch{
+            self.delegate?.didHandleError(error: error)
+            return nil
         }
     }
     

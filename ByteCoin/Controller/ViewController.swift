@@ -10,7 +10,7 @@ import UIKit
 
 class ViewController: UIViewController {
     
-    let coinManager = CoinManager()
+    var coinManager = CoinManager()
 
     @IBOutlet weak var currencyPikerView: UIPickerView!
     @IBOutlet weak var bicoinLabel: UILabel!
@@ -19,6 +19,8 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         currencyPikerView.dataSource = self
         currencyPikerView.delegate = self
+        coinManager.delegate = self
+        
         // Do any additional setup after loading the view.
     }
 }
@@ -44,3 +46,16 @@ extension  ViewController:UIPickerViewDataSource,UIPickerViewDelegate{
     
 }
 
+
+extension ViewController:CoinManagerDelegate{
+    
+    func didUpdateCoin(coin:CoinData){
+        DispatchQueue.main.async
+            {self.bicoinLabel.text = String(format:"%.f",coin.price)}
+    }
+    
+    func didHandleError(error:Error){
+        
+    }
+    
+}
